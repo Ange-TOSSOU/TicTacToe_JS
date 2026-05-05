@@ -29,15 +29,24 @@ function startGame() {
 }
 
 function turnClick(square) {
-    turn(square.target.id, humanPlayer);
+    // AI plays only if possible.
+    if (typeof originalBoard[square.target.id] == 'number') { // Is there at least an empty cell ?
+        if (turn(square.target.id, humanPlayer) == null) { // Does the human win ?
+            if(!checkTie()) turn(bestSpot(), aiPlayer);
+        }
+    }
 }
 
 function turn(squareId, player) {
+    // Make the move.
     originalBoard[squareId] = player;
     document.getElementById(squareId).innerText = player;
 
+    // Stop the game if there is a winner.
     let gameWon = checkWin(originalBoard, player);
     if (gameWon) gameOver(gameWon);
+
+    return gameWon;
 }
 
 function checkWin(board, player) {
@@ -63,11 +72,46 @@ function gameOver(gameWon) {
     // Highlight the winning disposition.
     for (let index of winCombos[gameWon.index]) {
         document.getElementById(index).style.backgroundColor =
-            gameWon.player == humanPlayer ? "blue" : "red";
+            gameWon.player == humanPlayer ? "green" : "red";
     }
 
     // Make the cells not clickable anymore.
     for (var i = 0; i < cells.length; i++) {
-        cells[i].removeEventListener('click', turnClick, false);
+        cells[i].removeEventListener('click', turnClick);
     }
+
+    declareWinner(gameWon.player == humanPlayer ? "You win !" : "You lose.");
+}
+
+function emptySquares() {
+    // Get empty cells on the board.
+    return originalBoard.filter(s => typeof s == 'number');
+}
+
+function bestSpot() {
+    // Get the first empty cell on the board.
+    return emptySquares()[0];
+}
+
+function declareWinner(who) {
+    // Display a message according to the result.
+    document.querySelector(".endgame").style.display = "block";
+    document.querySelector(".endgame .text").innerText = who;
+}
+
+function checkTie() {
+    if (emptySquares().length == 0) {
+        for (var i = 0; i < cells.length; i++) {
+            cells[i].style.backgroundColor = "gray";
+
+            // Make the cells not clickable anymore.
+            cells[i].removeEventListener('click', turnClick);
+        }
+
+        declareWinner("Tie Game !");
+        
+        return true;
+    }
+
+    return false;
 }
