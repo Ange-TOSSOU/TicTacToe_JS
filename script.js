@@ -83,14 +83,18 @@ function gameOver(gameWon) {
     declareWinner(gameWon.player == humanPlayer ? "You win !" : "You lose.");
 }
 
-function emptySquares() {
+function emptySquares(board) {
     // Get empty cells on the board.
-    return originalBoard.filter(s => typeof s == 'number');
+    return board.filter(s => typeof s == 'number');
+}
+
+function bestSpot1() {
+    // Get the first empty cell on the board.
+    return emptySquares(originalBoard)[0];
 }
 
 function bestSpot() {
-    // Get the first empty cell on the board.
-    return emptySquares()[0];
+    return minimax(originalBoard, aiPlayer).index;
 }
 
 function declareWinner(who) {
@@ -100,7 +104,7 @@ function declareWinner(who) {
 }
 
 function checkTie() {
-    if (emptySquares().length == 0) {
+    if (emptySquares(originalBoard).length == 0) {
         for (var i = 0; i < cells.length; i++) {
             cells[i].style.backgroundColor = "gray";
 
@@ -114,4 +118,67 @@ function checkTie() {
     }
 
     return false;
+}
+
+function minimax(newBoard, player) {
+    var availableSpots = emptySquares(newBoard);
+
+    // Check if there is a terminal state.
+    if (checkWin(newBoard, humanPlayer)) {
+        return {score: -10};
+    } else if (checkWin(newBoard, aiPlayer)) {
+        return {score: 10};
+    } else if (availableSpots.length === 0) {
+        return {score: 0};
+    }
+
+    // Get score for each move.
+    var moves = [];
+    for (var i = 0; i < availableSpots.length; i++) {
+        var move = {};
+        move.index = newBoard[availableSpots[i]];
+        newBoard[availableSpots[i]] = player;
+
+        if (player == aiPlayer) {
+            var result = minimax(newBoard, humanPlayer);
+            move.score = result.score;
+        } else {
+            var result = minimax(newBoard, aiPlayer);
+            move.score = result.score;
+        }
+
+        newBoard[availableSpots[i]] = move.index;
+
+        moves.push(move);
+    }
+
+    // Return the best move.
+    var bestMove;
+    if (player === aiPlayer) {
+        // The IA will maximize its score.
+
+        var bestScore = moves[0].score;
+        bestMove = 0;
+
+        for (var i = 1; i < moves.length; i++) {
+            if (moves[i].score > bestScore) {
+                bestScore = moves[i].score;
+                bestMove = i;
+            }
+        }
+    } else {
+        // The IA wants to minimize the human score.
+
+        var bestScore = moves[0].score;
+        bestMove = 0;
+
+        for (var i = 1; i < moves.length; i++) {
+            if (moves[i].score < bestScore) {
+                bestScore = moves[i].score;
+                bestMove = i;
+            }
+        }
+    }
+
+    return moves[bestMove];
 }
