@@ -99,7 +99,7 @@ function bestSpot() {
 
 function declareWinner(who) {
     // Display a message according to the result.
-    document.querySelector(".endgame").style.display = "block";
+    document.querySelector(".endgame").style.display = "flex";
     document.querySelector(".endgame .text").innerText = who;
 }
 
