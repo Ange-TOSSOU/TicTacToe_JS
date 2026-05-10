@@ -132,13 +132,15 @@ function minimax(newBoard, player) {
         return {score: 0};
     }
 
-    // Get score for each move.
+    // Get the score for each move.
     var moves = [];
     for (var i = 0; i < availableSpots.length; i++) {
+        // Save the board state and make a move for the player.
         var move = {};
         move.index = newBoard[availableSpots[i]];
         newBoard[availableSpots[i]] = player;
 
+        // Evaluate the move score.
         if (player == aiPlayer) {
             var result = minimax(newBoard, humanPlayer);
             move.score = result.score;
@@ -147,38 +149,50 @@ function minimax(newBoard, player) {
             move.score = result.score;
         }
 
+        // Get back to the initial board state.
         newBoard[availableSpots[i]] = move.index;
 
+        // Save the move and its score.
         moves.push(move);
     }
 
     // Return the best move.
-    var bestMove;
+    var bestMoves = [];
     if (player === aiPlayer) {
-        // The IA will maximize its score.
+        // The AI will maximize its score.
 
         var bestScore = moves[0].score;
-        bestMove = 0;
+        bestMoves.push(0);
 
         for (var i = 1; i < moves.length; i++) {
             if (moves[i].score > bestScore) {
                 bestScore = moves[i].score;
-                bestMove = i;
+                bestMoves = [i];
+            }
+            else if (moves[i].score == bestScore) {
+                bestMoves.push(i);
             }
         }
     } else {
-        // The IA wants to minimize the human score.
+        // The AI wants to minimize the human score in order to minimize the loss.
 
         var bestScore = moves[0].score;
-        bestMove = 0;
+        bestMoves.push(0);
 
         for (var i = 1; i < moves.length; i++) {
             if (moves[i].score < bestScore) {
                 bestScore = moves[i].score;
-                bestMove = i;
+                bestMoves = [i];
+            }
+            else if (moves[i].score == bestScore) {
+                bestMoves.push(i);
             }
         }
     }
+
+    // Get a random best move if multiple.
+    const random = Math.floor(Math.random() * bestMoves.length);
+    var bestMove = bestMoves[random];
 
     return moves[bestMove];
 }
