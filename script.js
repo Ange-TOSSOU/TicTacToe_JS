@@ -88,11 +88,6 @@ function emptySquares(board) {
     return board.filter(s => typeof s == 'number');
 }
 
-function bestSpot1() {
-    // Get the first empty cell on the board.
-    return emptySquares(originalBoard)[0];
-}
-
 function bestSpot() {
     return minimax(originalBoard, aiPlayer).index;
 }
